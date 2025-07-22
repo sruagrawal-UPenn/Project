@@ -48,10 +48,9 @@ contract Destination is AccessControl {
 		address newTokenAddr = address(newToken);
 
 		wrapped_tokens[_underlying_token] = newTokenAddr;
-		underlying_tokens[newTokenAddr] = _underlying_token;
+    underlying_tokens[newTokenAddr] = _underlying_token;
 
     tokens.push(newTokenAddr);
-
     emit Creation(_underlying_token, newTokenAddr);
     return newTokenAddr;
 	}
