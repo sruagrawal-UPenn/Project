@@ -99,26 +99,27 @@ def scan_blocks(chain, contract_info="contract_info.json"):
 
     def send_tx(w3, acct, built_tx, use_src: bool):
         nonlocal nonce_src, nonce_dst
-    
-        # base tx (copy so we can tweak safely)
+
+        # start from the tx built by .build_transaction(...)
         tx = dict(built_tx)
         tx["from"] = acct.address
         tx["nonce"] = nonce_src if use_src else nonce_dst
     
-        # --- estimate gas on a clean copy (no fee/chain fields) ---
+        # ---- estimate gas on a clean copy (NO fee/chain fields here) ----
         est = dict(tx)
-        for k in ("chainId", "gasPrice", "maxFeePerGas", "maxPriorityFeePerGas"):
+        # make sure none of these leak into estimate:
+        for k in ("chainId", "chain_id", "gasPrice", "gas_price", "maxFeePerGas", "max_fee_per_gas", "maxPriorityFeePerGas", "max_priority_fee_per_gas"):
             est.pop(k, None)
         try:
             tx["gas"] = w3.eth.estimate_gas(est)
         except Exception:
             tx["gas"] = 600_000
     
-        # --- add fees + chain id AFTER estimating ---
-        # Legacy fees work on Fuji + BSC testnet
-        tx["gasPrice"] = w3.eth.gas_price
-        tx["chainId"]  = w3.eth.chain_id
+        # ---- ADD FEE + CHAIN FIELDS AFTER ESTIMATE (web3 v6 names) ----
+        tx["gas_price"] = w3.eth.gas_price         # legacy gas works on BSC & Fuji
+        tx["chain_id"]  = w3.eth.chain_id
     
+        # sign & send
         signed = w3.eth.account.sign_transaction(tx, private_key=privkey)
         txh = w3.eth.send_raw_transaction(signed.rawTransaction)
         rcpt = w3.eth.wait_for_transaction_receipt(txh, timeout=120)
