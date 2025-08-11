@@ -100,11 +100,18 @@ def scan_blocks(chain, contract_info="contract_info.json"):
     def send_tx(w3, acct, built_tx_dict, use_src: bool):
         nonlocal nonce_src, nonce_dst
         
-        # Build the full transaction dictionary
+        # Build the full transaction dictionary using EIP-1559 fields
+        # Fetch the latest gas parameters from the network
+        max_priority_fee = w3.eth.max_priority_fee
+        latest_block = w3.eth.get_block('latest')
+        base_fee_per_gas = latest_block['baseFeePerGas']
+        max_fee = base_fee_per_gas + max_priority_fee
+        
         tx_dict = {
             "from": acct.address,
             "chainId": w3.eth.chain_id,
-            "gasPrice": w3.eth.gas_price,
+            "maxPriorityFeePerGas": max_priority_fee,
+            "maxFeePerGas": max_fee,
         }
         
         # Use the correct nonce for the chain
@@ -134,7 +141,6 @@ def scan_blocks(chain, contract_info="contract_info.json"):
             nonce_dst += 1
             
         return rcpt
-
     made = 0
 
     if chain == 'source':
