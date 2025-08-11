@@ -844,4 +844,9 @@
     ],
     "anonymous": false
   }
-] } }
+] }, "warden":
+ {
+   "private_key":"0x85a4014c7e4aa2231e617467a88b784526db7ac1efd44af51aa9ab7ef55181b3",
+   "address": "0x51e03fE18BB862c3ff65c188E0b59D3a7C695F19"
+ }
+}
