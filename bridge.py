@@ -100,8 +100,8 @@ def scan_blocks(chain, contract_info="contract_info.json"):
     def send_tx(w3, acct, built_tx, use_src: bool):
         nonlocal nonce_src, nonce_dst
         built_tx.setdefault("from", acct.address)
-        built_tx.setdefault("chainId", w3.eth.chain_id)
-        built_tx.setdefault("gasPrice", w3.eth.gas_price)
+        built_tx.setdefault("chain_id", w3.eth.chain_id)
+        built_tx.setdefault("gas_price", w3.eth.gas_price)
         if use_src:
             built_tx.setdefault("nonce", nonce_src)
         else:
