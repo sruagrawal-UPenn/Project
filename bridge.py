@@ -97,38 +97,42 @@ def scan_blocks(chain, contract_info="contract_info.json"):
     nonce_src = w3_src.eth.get_transaction_count(acct_src.address)
     nonce_dst = w3_dst.eth.get_transaction_count(acct_dst.address)
 
-    def send_tx(w3, acct, built_tx, use_src: bool):
+    def send_tx(w3, acct, built_tx_dict, use_src: bool):
         nonlocal nonce_src, nonce_dst
+        
+        # Build the full transaction dictionary
+        tx_dict = {
+            "from": acct.address,
+            "chainId": w3.eth.chain_id,
+            "gasPrice": w3.eth.gas_price,
+        }
+        
+        # Use the correct nonce for the chain
+        if use_src:
+            tx_dict["nonce"] = nonce_src
+        else:
+            tx_dict["nonce"] = nonce_dst
+        
+        # Merge the built transaction with our new dictionary
+        tx_dict.update(built_tx_dict)
 
-        # start from the tx built by .build_transaction(...)
-        tx = dict(built_tx)
-        tx["from"] = acct.address
-        tx["nonce"] = nonce_src if use_src else nonce_dst
-    
-        # ---- estimate gas on a clean copy (NO fee/chain fields here) ----
-        est = dict(tx)
-        # make sure none of these leak into estimate:
-        for k in ("chainId", "chain_id", "gasPrice", "gas_price", "maxFeePerGas", "max_fee_per_gas", "maxPriorityFeePerGas", "max_priority_fee_per_gas"):
-            est.pop(k, None)
+        # Estimate gas as a fallback
         try:
-            tx["gas"] = w3.eth.estimate_gas(est)
+            tx_dict["gas"] = w3.eth.estimate_gas(tx_dict)
         except Exception:
-            tx["gas"] = 600_000
-    
-        # ---- ADD FEE + CHAIN FIELDS AFTER ESTIMATE (web3 v6 names) ----
-        tx["gas_price"] = w3.eth.gas_price         # legacy gas works on BSC & Fuji
-        tx["chain_id"]  = w3.eth.chain_id
-    
-        # sign & send
-        signed = w3.eth.account.sign_transaction(tx, private_key=privkey)
+            tx_dict["gas"] = 600_000
+
+        # Sign and send the transaction
+        signed = w3.eth.account.sign_transaction(tx_dict, private_key=privkey)
         txh = w3.eth.send_raw_transaction(signed.rawTransaction)
         rcpt = w3.eth.wait_for_transaction_receipt(txh, timeout=120)
-    
+        
+        # Increment the correct nonce
         if use_src:
             nonce_src += 1
         else:
             nonce_dst += 1
-    
+            
         return rcpt
 
     made = 0
