@@ -131,7 +131,7 @@ def scan_blocks(chain, contract_info="contract_info.json"):
 
         # Sign and send the transaction
         signed = w3.eth.account.sign_transaction(tx_dict, private_key=privkey)
-        txh = w3.eth.send_raw_transaction(signed.rawTransaction)
+        txh = w3.eth.send_raw_transaction(signed.raw_transaction)
         rcpt = w3.eth.wait_for_transaction_receipt(txh, timeout=120)
         
         # Increment the correct nonce
