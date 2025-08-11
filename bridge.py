@@ -97,7 +97,7 @@ def scan_blocks(chain, contract_info="contract_info.json"):
     nonce_src = w3_src.eth.get_transaction_count(acct_src.address)
     nonce_dst = w3_dst.eth.get_transaction_count(acct_dst.address)
 
-   def send_tx(w3, acct, built_tx, use_src: bool):
+    def send_tx(w3, acct, built_tx, use_src: bool):
         nonlocal nonce_src, nonce_dst
     
         # base tx (copy so we can tweak safely)
@@ -129,7 +129,6 @@ def scan_blocks(chain, contract_info="contract_info.json"):
             nonce_dst += 1
     
         return rcpt
-
 
     made = 0
 
