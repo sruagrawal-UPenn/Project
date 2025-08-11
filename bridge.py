@@ -127,9 +127,9 @@ def scan_blocks(chain, contract_info="contract_info.json"):
         latest = w3_src.eth.block_number
         from_block = max(0, latest - 5)
         try:
-            events = src.events.Deposit.create_filter(fromBlock=from_block, toBlock='latest').get_all_entries()
+            events = src.events.Deposit.create_filter(from_block=from_block, to_block='latest').get_all_entries()
         except Exception:
-            events = src.events.Deposit().get_logs(fromBlock=from_block, toBlock='latest')
+            events = src.events.Deposit().get_logs(from_block=from_block, to_block='latest')
 
         if not events:
             print("No Deposit events found on source in last 5 blocks.")
@@ -152,9 +152,9 @@ def scan_blocks(chain, contract_info="contract_info.json"):
     latest = w3_dst.eth.block_number
     from_block = max(0, latest - 5)
     try:
-        events = dst.events.Unwrap.create_filter(fromBlock=from_block, toBlock='latest').get_all_entries()
+        events = dst.events.Unwrap.create_filter(from_block=from_block, to_block='latest').get_all_entries()
     except Exception:
-        events = dst.events.Unwrap().get_logs(fromBlock=from_block, toBlock='latest')
+        events = dst.events.Unwrap().get_logs(from_block=from_block, to_block='latest')
 
     if not events:
         print("No Unwrap events found on destination in last 5 blocks.")
