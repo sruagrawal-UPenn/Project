@@ -137,12 +137,13 @@ def scan_blocks(chain, contract_info="contract_info.json"):
 
         for e in events:
             a = e["args"]
-            token     = a["token"]
-            recipient = a["recipient"]
-            amount    = a["amount"]
-            # call destination.wrap(_underlying_token, _recipient, _amount)
-            tx = dst.functions.wrap(token, recipient, amount).build_transaction({})
+            token     = Web3.to_checksum_address(a["token"])
+            recipient = Web3.to_checksum_address(a["recipient"])
+            amount    = int(a["amount"])
+            
+            tx = dst.functions.wrap(token, recipient, amount).build_transaction({"from": acct_dst.address})
             rcpt = send_tx(w3_dst, acct_dst, tx, use_src=False)
+
             print(f"wrap() -> {rcpt.transactionHash.hex()}")
             made += 1
 
@@ -162,12 +163,13 @@ def scan_blocks(chain, contract_info="contract_info.json"):
 
     for e in events:
         a = e["args"]
-        underlying = a["underlying_token"]
-        to_addr    = a["to"]
-        amount     = a["amount"]
-        # call source.withdraw(_token, _recipient, _amount)
-        tx = src.functions.withdraw(underlying, to_addr, amount).build_transaction({})
+        underlying = Web3.to_checksum_address(a["underlying_token"])
+        to_addr    = Web3.to_checksum_address(a["to"])
+        amount     = int(a["amount"])
+        
+        tx = src.functions.withdraw(underlying, to_addr, amount).build_transaction({"from": acct_src.address})
         rcpt = send_tx(w3_src, acct_src, tx, use_src=True)
+
         print(f"withdraw() -> {rcpt.transactionHash.hex()}")
         made += 1
 
